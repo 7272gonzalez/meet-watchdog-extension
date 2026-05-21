@@ -1,6 +1,7 @@
 // Runs in an offscreen document — plays the alert sound via Web Audio API.
 
-chrome.runtime.onMessage.addListener((msg) => {
+chrome.runtime.onMessage.addListener((msg, sender) => {
+  if (sender.id !== chrome.runtime.id) return;
   if (msg.type !== 'play-sound') return;
 
   const ctx = new AudioContext();

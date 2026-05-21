@@ -27,6 +27,13 @@ const PLATFORM_PATTERNS = {
 // Maps notification ID → meeting URL so clicks can open the right link
 const notifUrlMap = {};
 
+// Safe URL opener — only opens https:// URLs
+function openUrl(url) {
+  if (typeof url === 'string' && url.startsWith('https://')) {
+    chrome.tabs.create({ url });
+  }
+}
+
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
 
@@ -138,16 +145,20 @@ async function getActiveEvents() {
 
 async function isInCall(platform, url) {
   let identifier;
+  let queryUrl;
   if (platform === 'Meet') {
     identifier = url.split('/').pop().split('?')[0];
+    queryUrl = ['https://meet.google.com/*'];
   } else if (platform === 'Zoom') {
     const m = url.match(/\/j\/(\d+)/);
     identifier = m ? m[1] : 'zoom.us/j';
+    queryUrl = ['https://*.zoom.us/*'];
   } else {
     identifier = 'teams.microsoft.com/l/meetup-join';
+    queryUrl = ['https://teams.microsoft.com/*'];
   }
 
-  const tabs = await chrome.tabs.query({});
+  const tabs = await chrome.tabs.query({ url: queryUrl });
   return tabs.some((tab) => tab.url && tab.url.includes(identifier));
 }
 
@@ -193,7 +204,7 @@ function sendNotification(title, body, url) {
 
 chrome.notifications.onButtonClicked.addListener((notifId, buttonIndex) => {
   if (buttonIndex === 0 && notifUrlMap[notifId]) {
-    chrome.tabs.create({ url: notifUrlMap[notifId] });
+    openUrl(notifUrlMap[notifId]);
     chrome.notifications.clear(notifId);
     delete notifUrlMap[notifId];
   }
@@ -201,10 +212,14 @@ chrome.notifications.onButtonClicked.addListener((notifId, buttonIndex) => {
 
 chrome.notifications.onClicked.addListener((notifId) => {
   if (notifUrlMap[notifId]) {
-    chrome.tabs.create({ url: notifUrlMap[notifId] });
+    openUrl(notifUrlMap[notifId]);
     chrome.notifications.clear(notifId);
     delete notifUrlMap[notifId];
   }
+});
+
+chrome.notifications.onClosed.addListener((notifId) => {
+  delete notifUrlMap[notifId];
 });
 
 
@@ -251,7 +266,7 @@ async function checkMeetings() {
       url
     );
     playAlertSound();
-    chrome.tabs.create({ url });
+    openUrl(url);
 
     meetingState[url] = { alerts: alertCount + 1 };
     changed = true;
@@ -279,8 +294,8 @@ chrome.runtime.onStartup.addListener(()  => checkMeetings());
 chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   if (msg.type === 'sign-in') {
     getAuthToken(true)
-      .then((token) => sendResponse({ ok: true, token }))
-      .catch((e)    => sendResponse({ ok: false, error: e.message }));
+      .then(()    => sendResponse({ ok: true }))
+      .catch((e)  => sendResponse({ ok: false, error: e.message }));
     return true; // async
   }
 
@@ -293,11 +308,16 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   }
 
   if (msg.type === 'config-updated') {
-    Object.assign(CONFIG, {
-      ALERT_BEFORE_MINUTES: msg.values.alertBeforeMinutes,
-      GRACE_PERIOD_MINUTES: msg.values.gracePeriodMinutes,
-      MAX_ALERTS:           msg.values.maxAlerts,
-    });
+    const { alertBeforeMinutes: a, gracePeriodMinutes: g, maxAlerts: m } = msg.values || {};
+    if (
+      Number.isFinite(a) && a >= 0  && a <= 30 &&
+      Number.isFinite(g) && g >= 1  && g <= 60 &&
+      Number.isFinite(m) && m >= 1  && m <= 10
+    ) {
+      CONFIG.ALERT_BEFORE_MINUTES = a;
+      CONFIG.GRACE_PERIOD_MINUTES = g;
+      CONFIG.MAX_ALERTS           = m;
+    }
     sendResponse({ ok: true });
     return;
   }

@@ -1,2 +1,6 @@
 # Private key — keep this file safe, never commit it
 key.pem
+*.pem
+*.swp
+.*.swp
+.claude/
