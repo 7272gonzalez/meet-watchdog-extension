@@ -5,17 +5,20 @@ chrome.runtime.onMessage.addListener((msg) => {
 
   const ctx = new AudioContext();
 
-  // Two-tone alert: high beep followed by a slightly lower one
-  [[880, 0, 0.18], [660, 0.2, 0.38]].forEach(([freq, start, end]) => {
+  // Rapid beeps: 6 quick square-wave bursts at 1050 Hz
+  for (let i = 0; i < 6; i++) {
     const osc  = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.connect(gain);
     gain.connect(ctx.destination);
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(freq, ctx.currentTime + start);
-    gain.gain.setValueAtTime(0.4, ctx.currentTime + start);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + end);
-    osc.start(ctx.currentTime + start);
-    osc.stop(ctx.currentTime + end);
-  });
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(1050, ctx.currentTime);
+    const t = ctx.currentTime + i * 0.22;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.35, t + 0.01);
+    gain.gain.setValueAtTime(0.35, t + 0.12);
+    gain.gain.linearRampToValueAtTime(0, t + 0.15);
+    osc.start(t);
+    osc.stop(t + 0.16);
+  }
 });
