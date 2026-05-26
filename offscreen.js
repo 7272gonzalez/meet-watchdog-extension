@@ -12,6 +12,8 @@ function playSound(name) {
     case 'chime':      playChime(ctx);      break;
     case 'siren':      playSiren(ctx);      break;
     case 'buzzer':     playBuzzer(ctx);     break;
+    case 'phoneRing':  playPhoneRing(ctx);  break;
+    case 'triplePing': playTriplePing(ctx); break;
     default:           playRapidBeeps(ctx); break;  // 'rapidBeeps' + fallback
   }
 }
@@ -69,4 +71,37 @@ function playBuzzer(ctx) {
   gain.gain.setValueAtTime(0.5, ctx.currentTime + 0.55);
   gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.65);
   osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.66);
+}
+
+function playPhoneRing(ctx) {
+  // Classic telephone: two mixed tones (480 Hz + 620 Hz), two ring bursts
+  for (let ring = 0; ring < 2; ring++) {
+    const tOn  = ctx.currentTime + ring * 0.9;
+    const tOff = tOn + 0.5;
+    [480, 620].forEach((freq) => {
+      const osc = ctx.createOscillator(), gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, tOn);
+      gain.gain.setValueAtTime(0, tOn);
+      gain.gain.linearRampToValueAtTime(0.22, tOn + 0.02);
+      gain.gain.setValueAtTime(0.22, tOff - 0.04);
+      gain.gain.linearRampToValueAtTime(0, tOff);
+      osc.start(tOn); osc.stop(tOff + 0.01);
+    });
+  }
+}
+
+function playTriplePing(ctx) {
+  // Three clean sine-wave pings with a natural decay
+  [0, 0.32, 0.64].forEach((offset) => {
+    const t = ctx.currentTime + offset;
+    const osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1400, t);
+    gain.gain.setValueAtTime(0.5, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+    osc.start(t); osc.stop(t + 0.29);
+  });
 }

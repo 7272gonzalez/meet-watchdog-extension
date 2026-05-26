@@ -318,7 +318,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
 
   if (msg.type === 'config-updated') {
     const { alertBeforeMinutes: a, gracePeriodMinutes: g, maxAlerts: m, alertSound: s } = msg.values || {};
-    const validSounds = ['chime', 'rapidBeeps', 'siren', 'buzzer'];
+    const validSounds = ['chime', 'rapidBeeps', 'siren', 'buzzer', 'phoneRing', 'triplePing'];
     if (
       Number.isFinite(a) && a >= 0  && a <= 30 &&
       Number.isFinite(g) && g >= 1  && g <= 60 &&
