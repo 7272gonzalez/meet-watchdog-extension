@@ -244,12 +244,19 @@ async function checkMeetings() {
 
     if (entry === 'attended') continue;
 
-    // Only check tab after meeting has started (prevents false positive if link
-    // was opened early e.g. to check meeting details)
+    // After the meeting has started: if tab is open, mark as attended and stop.
     if (secsSinceStart >= 0 && await isInCall(platform, url)) {
       console.log(`[MeetWatchdog] Detected in call: ${title}`);
       meetingState[url] = 'attended';
       changed = true;
+      continue;
+    }
+
+    // Before the meeting starts: if the tab is already open (joined early),
+    // skip alerting — but don't mark attended yet in case the tab is closed
+    // before the meeting begins.
+    if (secsSinceStart < 0 && await isInCall(platform, url)) {
+      console.log(`[MeetWatchdog] Tab open early, skipping alert: ${title}`);
       continue;
     }
 
