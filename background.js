@@ -6,15 +6,17 @@ const CONFIG = {
   ALERT_BEFORE_MINUTES: 0,
   GRACE_PERIOD_MINUTES: 15,
   MAX_ALERTS: 3,
+  ALERT_SOUND: 'rapidBeeps',
 };
 
 // Load saved config from storage on startup
 chrome.storage.sync.get(
-  { alertBeforeMinutes: 0, gracePeriodMinutes: 15, maxAlerts: 3 },
+  { alertBeforeMinutes: 0, gracePeriodMinutes: 15, maxAlerts: 3, alertSound: 'rapidBeeps' },
   (vals) => {
     CONFIG.ALERT_BEFORE_MINUTES = vals.alertBeforeMinutes;
     CONFIG.GRACE_PERIOD_MINUTES = vals.gracePeriodMinutes;
     CONFIG.MAX_ALERTS           = vals.maxAlerts;
+    CONFIG.ALERT_SOUND          = vals.alertSound;
   }
 );
 
@@ -175,7 +177,7 @@ async function playAlertSound() {
       justification: 'Play meeting alert sound',
     });
   }
-  chrome.runtime.sendMessage({ type: 'play-sound' });
+  chrome.runtime.sendMessage({ type: 'play-sound', sound: CONFIG.ALERT_SOUND });
 }
 
 
@@ -315,15 +317,18 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
   }
 
   if (msg.type === 'config-updated') {
-    const { alertBeforeMinutes: a, gracePeriodMinutes: g, maxAlerts: m } = msg.values || {};
+    const { alertBeforeMinutes: a, gracePeriodMinutes: g, maxAlerts: m, alertSound: s } = msg.values || {};
+    const validSounds = ['chime', 'rapidBeeps', 'siren', 'buzzer'];
     if (
       Number.isFinite(a) && a >= 0  && a <= 30 &&
       Number.isFinite(g) && g >= 1  && g <= 60 &&
-      Number.isFinite(m) && m >= 1  && m <= 10
+      Number.isFinite(m) && m >= 1  && m <= 10 &&
+      validSounds.includes(s)
     ) {
       CONFIG.ALERT_BEFORE_MINUTES = a;
       CONFIG.GRACE_PERIOD_MINUTES = g;
       CONFIG.MAX_ALERTS           = m;
+      CONFIG.ALERT_SOUND          = s;
     }
     sendResponse({ ok: true });
     return;
