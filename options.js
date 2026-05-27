@@ -40,14 +40,18 @@ document.getElementById('previewSound').addEventListener('click', () => {
 });
 
 function previewSound(name) {
+  if (name === 'dogBark') { previewDogBark(); return; }
+
   const ctx = new AudioContext();
   switch (name) {
-    case 'chime':      previewChime(ctx);      break;
-    case 'siren':      previewSiren(ctx);      break;
-    case 'buzzer':     previewBuzzer(ctx);     break;
-    case 'phoneRing':  previewPhoneRing(ctx);  break;
-    case 'triplePing': previewTriplePing(ctx); break;
-    default:           previewRapidBeeps(ctx); break;
+    case 'chime':          previewChime(ctx);         break;
+    case 'siren':          previewSiren(ctx);         break;
+    case 'buzzer':         previewBuzzer(ctx);        break;
+    case 'phoneRing':      previewPhoneRing(ctx);     break;
+    case 'triplePing':     previewTriplePing(ctx);    break;
+    case 'windChimes':     previewWindChimes(ctx);    break;
+    case 'meditationBell': previewMeditationBell(ctx); break;
+    default:               previewRapidBeeps(ctx);    break;
   }
 }
 
@@ -135,6 +139,47 @@ function previewTriplePing(ctx) {
     gain.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
     osc.start(t); osc.stop(t + 0.29);
   });
+}
+
+function previewWindChimes(ctx) {
+  const notes   = [523, 659, 784, 1047, 880, 659, 1047, 784];
+  const offsets = [0, 0.18, 0.38, 0.52, 0.72, 0.95, 1.12, 1.35];
+  notes.forEach((freq, i) => {
+    const t = ctx.currentTime + offsets[i];
+    const osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, t);
+    gain.gain.setValueAtTime(0.22, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 1.4);
+    osc.start(t); osc.stop(t + 1.5);
+  });
+}
+
+function previewMeditationBell(ctx) {
+  const fundamental = 528;
+  const osc = ctx.createOscillator(), gain = ctx.createGain();
+  osc.connect(gain); gain.connect(ctx.destination);
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(fundamental, ctx.currentTime);
+  gain.gain.setValueAtTime(0.5, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 3.0);
+  osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 3.1);
+
+  const osc2 = ctx.createOscillator(), gain2 = ctx.createGain();
+  osc2.connect(gain2); gain2.connect(ctx.destination);
+  osc2.type = 'sine';
+  osc2.frequency.setValueAtTime(fundamental * 2.76, ctx.currentTime);
+  gain2.gain.setValueAtTime(0.12, ctx.currentTime);
+  gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.5);
+  osc2.start(ctx.currentTime); osc2.stop(ctx.currentTime + 1.6);
+}
+
+function previewDogBark() {
+  // Options page is a normal extension page — can fetch extension resources directly
+  const audio = new Audio(chrome.runtime.getURL('sounds/dog-bark.mp3'));
+  audio.volume = 0.9;
+  audio.play().catch((err) => console.warn('[MeetWatchdog] Dog bark preview failed:', err));
 }
 
 load();
