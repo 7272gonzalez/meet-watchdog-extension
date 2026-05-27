@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Meet Watchdog — Privacy Policy</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      font-size: 16px;
+      line-height: 1.7;
+      color: #202124;
+      background: #fff;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 60px 32px;
+    }
+    h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+    .updated { font-size: 14px; color: #5f6368; margin-bottom: 40px; }
+    h2 { font-size: 18px; font-weight: 600; margin: 36px 0 12px; }
+    p  { margin-bottom: 16px; }
+    ul { margin: 0 0 16px 24px; }
+    li { margin-bottom: 8px; }
+    .highlight {
+      background: #e8f0fe;
+      border-left: 4px solid #1a73e8;
+      padding: 16px 20px;
+      border-radius: 0 8px 8px 0;
+      margin: 24px 0;
+    }
+    a { color: #1a73e8; }
+    footer { margin-top: 60px; font-size: 14px; color: #5f6368; border-top: 1px solid #e0e0e0; padding-top: 24px; }
+  </style>
+</head>
+<body>
+
+  <h1>Privacy Policy</h1>
+  <p class="updated">Meet Watchdog Chrome Extension &mdash; Last updated May 2026</p>
+
+  <div class="highlight">
+    <strong>Short version:</strong> Meet Watchdog reads your Google Calendar to detect active meetings. All processing happens inside your browser. No data is ever sent to us or any third party.
+  </div>
+
+  <h2>What the extension accesses</h2>
+  <p>Meet Watchdog requests read-only access to your Google Calendar in order to:</p>
+  <ul>
+    <li>Read the titles, start times, and video call links of your calendar events</li>
+    <li>Determine which meetings are currently active or starting soon</li>
+    <li>Check whether you have that meeting open in a Chrome tab</li>
+  </ul>
+  <p>Access is granted through Google's OAuth 2.0 flow via Chrome's built-in identity API. The extension only requests the <code>calendar.readonly</code> scope — it cannot create, edit, or delete calendar events.</p>
+
+  <h2>How your data is used</h2>
+  <p>Calendar data is used solely to power the meeting alert feature. Specifically:</p>
+  <ul>
+    <li>Event titles and start times are used to identify active meetings and compose the alert notification text</li>
+    <li>Video call URLs (Google Meet, Zoom, Teams) are used to open the correct call link when you click Join Now</li>
+    <li>A small record of which meetings have been alerted or attended is stored locally in your browser (<code>chrome.storage.local</code>) so the extension knows when to stop alerting</li>
+  </ul>
+
+  <h2>Data storage and retention</h2>
+  <p>All data stays on your device:</p>
+  <ul>
+    <li><strong>No server.</strong> Meet Watchdog has no backend server. Nothing is transmitted off your computer.</li>
+    <li><strong>Local storage only.</strong> The only things written to storage are your settings (alert timing preferences) and a small state file tracking which meetings you've attended. Both are stored in Chrome's local extension storage on your machine.</li>
+    <li><strong>OAuth token.</strong> Your Google access token is managed entirely by Chrome's identity system. Meet Watchdog never reads, stores, or logs the token value itself.</li>
+    <li><strong>Clearing data.</strong> You can reset all meeting state at any time via the extension popup → Reset meeting state. Uninstalling the extension removes all stored data.</li>
+  </ul>
+
+  <h2>Data sharing</h2>
+  <p>Meet Watchdog does not share any data with anyone. There are no analytics, no crash reporting services, no advertising networks, and no third-party SDKs. The only external connection the extension makes is directly to <strong>Google Calendar API</strong> (<code>www.googleapis.com</code>) to read your own calendar — using your own credentials.</p>
+
+  <h2>Permissions explained</h2>
+  <ul>
+    <li><strong>identity</strong> — to sign in with your Google account via Chrome's built-in OAuth flow</li>
+    <li><strong>tabs</strong> — to check whether a meeting URL is already open in a Chrome tab (so it knows you've joined)</li>
+    <li><strong>notifications</strong> — to show the meeting alert pop-up</li>
+    <li><strong>alarms</strong> — to check your calendar once per minute in the background</li>
+    <li><strong>storage</strong> — to save your settings and meeting attendance state locally</li>
+    <li><strong>offscreen</strong> — to play the alert sound using the Web Audio API</li>
+  </ul>
+
+  <h2>Children's privacy</h2>
+  <p>Meet Watchdog is a productivity tool intended for adults. It does not knowingly collect any information from children under 13.</p>
+
+  <h2>Changes to this policy</h2>
+  <p>If this policy changes materially, the updated version will be posted here with a new "Last updated" date. Continued use of the extension after a change constitutes acceptance of the updated policy.</p>
+
+  <h2>Contact</h2>
+  <p>Questions about this privacy policy can be directed to the project's <a href="https://github.com/7272gonzalez/meet-watchdog-extension/issues">GitHub Issues page</a>.</p>
+
+  <footer>
+    Meet Watchdog is an open-source project. Source code is available at
+    <a href="https://github.com/7272gonzalez/meet-watchdog-extension">github.com/7272gonzalez/meet-watchdog-extension</a>.
+    &nbsp;|&nbsp;
+    <a href="terms-of-service.html">Terms of Service</a>
+  </footer>
+
+</body>
+</html>
