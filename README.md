@@ -6,6 +6,18 @@ Works on macOS, Windows, and Linux — anywhere Chrome runs. Supports Google Mee
 
 ---
 
+## Installation
+
+**[➕ Add to Chrome — Chrome Web Store](https://chromewebstore.google.com/detail/jlihoannalepinffcjbokdjngaadgkln)**
+
+1. Click **Add to Chrome** on the store page and confirm the install
+2. Click the Meet Watchdog icon (🐶) in your Chrome toolbar
+3. Click **Connect Google Calendar**, sign in, and click **Allow**
+
+That's it — Meet Watchdog starts watching your calendar immediately.
+
+---
+
 ## How it works
 
 1. Every minute the extension checks your Google Calendar for meetings that are starting now or have recently started.
@@ -13,32 +25,6 @@ Works on macOS, Windows, and Linux — anywhere Chrome runs. Supports Google Mee
 3. If you haven't joined, it plays a sound, shows a notification with a **Join Now** button, and opens the call link in a new tab.
 4. Once it sees you've joined, it stops alerting for that meeting.
 5. If you never join, it gives up after a few attempts so it doesn't keep interrupting you.
-
----
-
-## Installation
-
-### Step 1 — Download the extension
-
-1. Go to the [GitHub repository](https://github.com/7272gonzalez/meet-watchdog-extension)
-2. Click the green **Code** button → **Download ZIP**
-3. Unzip the downloaded file — you'll get a folder called `meet-watchdog-extension-main`
-
-### Step 2 — Load it into Chrome
-
-1. Open Chrome and go to `chrome://extensions`
-2. Turn on **Developer mode** using the toggle in the top-right corner
-3. Click **Load unpacked**
-4. Select the `meet-watchdog-extension-main` folder you just unzipped
-5. The Meet Watchdog icon (🐶) appears in your Chrome toolbar
-
-### Step 3 — Connect your Google Calendar
-
-1. Click the Meet Watchdog icon in the toolbar
-2. Click **Connect Google Calendar**
-3. Sign in with your Google account and click **Allow**
-
-That's it — Meet Watchdog starts checking immediately.
 
 ---
 
@@ -51,6 +37,7 @@ Click the Meet Watchdog icon → **Settings** to customise the behaviour:
 | Alert before start | `0` min | Get alerted early — e.g. set to `2` for a 2-minute warning before the meeting starts |
 | Grace period | `15` min | Stop alerting this many minutes after the meeting started |
 | Max alerts | `3` | Give up after this many attempts if you haven't joined |
+| Alert sound | Rapid Beeps | Choose from 9 sounds including chime, siren, phone ring, dog bark, and more |
 
 ---
 
@@ -74,4 +61,18 @@ Click the extension icon → **Disconnect**, then click **Connect Google Calenda
 
 ## Privacy
 
-Meet Watchdog only reads your calendar event titles, times, and video call links. No data is stored outside your browser or sent anywhere — everything stays on your computer.
+Meet Watchdog only reads your calendar event titles, times, and video call links. No data is stored outside your browser or sent anywhere — everything stays on your computer. See the full [Privacy Policy](https://7272gonzalez.github.io/privacy-policy.html).
+
+---
+
+## For developers — unpacked install
+
+If you want to run the extension from source:
+
+1. Clone or download this repository
+2. Open Chrome and go to `chrome://extensions`
+3. Turn on **Developer mode** (toggle in the top-right corner)
+4. Click **Load unpacked** and select the repository folder
+5. Connect your Google Calendar via the extension popup
+
+Note: the unpacked version uses a different extension ID than the Chrome Web Store version. You will need a separate OAuth client ID configured in Google Cloud Console to use sign-in on the unpacked build.
