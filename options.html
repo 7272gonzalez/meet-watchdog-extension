@@ -24,6 +24,9 @@
       border-radius: 6px;
       font-size: 14px;
     }
+    .checkbox-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 20px; }
+    .checkbox-row input[type="checkbox"] { margin-top: 2px; flex-shrink: 0; width: 16px; height: 16px; cursor: pointer; }
+    .checkbox-row label { font-weight: 500; cursor: pointer; }
     .sound-row { display: flex; align-items: center; gap: 10px; }
     select {
       padding: 6px 10px;
@@ -79,6 +82,14 @@
     <label for="maxAlerts">Max alerts per meeting</label>
     <input type="number" id="maxAlerts" min="1" max="10" value="3">
     <p class="hint">Give up after this many attempts if you haven't joined.</p>
+  </div>
+
+  <div class="checkbox-row">
+    <input type="checkbox" id="ownedCalendarsOnly" checked>
+    <div>
+      <label for="ownedCalendarsOnly">Only monitor my own calendars</label>
+      <p class="hint">When checked, alerts only fire for meetings on calendars you own. Uncheck to also monitor shared and subscribed calendars.</p>
+    </div>
   </div>
 
   <div class="field">

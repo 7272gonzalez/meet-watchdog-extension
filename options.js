@@ -3,14 +3,16 @@ const DEFAULTS = {
   gracePeriodMinutes: 15,
   maxAlerts: 3,
   alertSound: 'rapidBeeps',
+  ownedCalendarsOnly: true,
 };
 
 async function load() {
   const stored = await chrome.storage.sync.get(DEFAULTS);
-  document.getElementById('alertBefore').value  = stored.alertBeforeMinutes;
-  document.getElementById('gracePeriod').value  = stored.gracePeriodMinutes;
-  document.getElementById('maxAlerts').value    = stored.maxAlerts;
-  document.getElementById('alertSound').value   = stored.alertSound;
+  document.getElementById('alertBefore').value          = stored.alertBeforeMinutes;
+  document.getElementById('gracePeriod').value          = stored.gracePeriodMinutes;
+  document.getElementById('maxAlerts').value            = stored.maxAlerts;
+  document.getElementById('alertSound').value           = stored.alertSound;
+  document.getElementById('ownedCalendarsOnly').checked = stored.ownedCalendarsOnly;
 }
 
 document.getElementById('save').addEventListener('click', async () => {
@@ -20,6 +22,7 @@ document.getElementById('save').addEventListener('click', async () => {
     gracePeriodMinutes: clamp(parseInt(document.getElementById('gracePeriod').value, 10) || 15, 1,  60),
     maxAlerts:          clamp(parseInt(document.getElementById('maxAlerts').value,   10) || 3,  1,  10),
     alertSound:         document.getElementById('alertSound').value,
+    ownedCalendarsOnly: document.getElementById('ownedCalendarsOnly').checked,
   };
 
   await chrome.storage.sync.set(values);

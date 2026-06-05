@@ -3,10 +3,11 @@
 
 // Default config — overridden by values saved in options page
 const CONFIG = {
-  ALERT_BEFORE_MINUTES: 0,
-  GRACE_PERIOD_MINUTES: 15,
-  MAX_ALERTS: 3,
-  ALERT_SOUND: 'rapidBeeps',
+  ALERT_BEFORE_MINUTES:  0,
+  GRACE_PERIOD_MINUTES:  15,
+  MAX_ALERTS:            3,
+  ALERT_SOUND:           'rapidBeeps',
+  OWNED_CALENDARS_ONLY:  true,
 };
 
 const VALID_SOUNDS = ['chime', 'rapidBeeps', 'siren', 'buzzer', 'phoneRing', 'triplePing', 'windChimes', 'meditationBell', 'dogBark'];
@@ -16,22 +17,24 @@ const VALID_SOUNDS = ['chime', 'rapidBeeps', 'siren', 'buzzer', 'phoneRing', 'tr
 // values can never push the time window beyond intended bounds.
 function sanitiseConfig(vals) {
   return {
-    alertBeforeMinutes: (Number.isFinite(vals.alertBeforeMinutes) && vals.alertBeforeMinutes >= 0  && vals.alertBeforeMinutes <= 30)  ? vals.alertBeforeMinutes : 0,
-    gracePeriodMinutes: (Number.isFinite(vals.gracePeriodMinutes) && vals.gracePeriodMinutes >= 1  && vals.gracePeriodMinutes <= 60)  ? vals.gracePeriodMinutes : 15,
-    maxAlerts:          (Number.isFinite(vals.maxAlerts)          && vals.maxAlerts          >= 1  && vals.maxAlerts          <= 10)  ? vals.maxAlerts          : 3,
-    alertSound:         VALID_SOUNDS.includes(vals.alertSound) ? vals.alertSound : 'rapidBeeps',
+    alertBeforeMinutes:  (Number.isFinite(vals.alertBeforeMinutes) && vals.alertBeforeMinutes >= 0 && vals.alertBeforeMinutes <= 30) ? vals.alertBeforeMinutes : 0,
+    gracePeriodMinutes:  (Number.isFinite(vals.gracePeriodMinutes) && vals.gracePeriodMinutes >= 1 && vals.gracePeriodMinutes <= 60) ? vals.gracePeriodMinutes : 15,
+    maxAlerts:           (Number.isFinite(vals.maxAlerts)          && vals.maxAlerts          >= 1 && vals.maxAlerts          <= 10) ? vals.maxAlerts          : 3,
+    alertSound:          VALID_SOUNDS.includes(vals.alertSound) ? vals.alertSound : 'rapidBeeps',
+    ownedCalendarsOnly:  vals.ownedCalendarsOnly !== false, // default true; only false when explicitly set
   };
 }
 
 // Load saved config from storage on startup
 chrome.storage.sync.get(
-  { alertBeforeMinutes: 0, gracePeriodMinutes: 15, maxAlerts: 3, alertSound: 'rapidBeeps' },
+  { alertBeforeMinutes: 0, gracePeriodMinutes: 15, maxAlerts: 3, alertSound: 'rapidBeeps', ownedCalendarsOnly: true },
   (vals) => {
     const safe = sanitiseConfig(vals);
     CONFIG.ALERT_BEFORE_MINUTES = safe.alertBeforeMinutes;
     CONFIG.GRACE_PERIOD_MINUTES = safe.gracePeriodMinutes;
     CONFIG.MAX_ALERTS           = safe.maxAlerts;
     CONFIG.ALERT_SOUND          = safe.alertSound;
+    CONFIG.OWNED_CALENDARS_ONLY = safe.ownedCalendarsOnly;
   }
 );
 
@@ -100,7 +103,11 @@ async function getActiveEvents() {
   const events   = [];
   const seenUrls = new Set();
 
-  for (const cal of calList.items || []) {
+  const calendars = (calList.items || []).filter(
+    (cal) => !CONFIG.OWNED_CALENDARS_ONLY || cal.accessRole === 'owner'
+  );
+
+  for (const cal of calendars) {
     const params = new URLSearchParams({
       timeMin: windowStart.toISOString(),
       timeMax: windowEnd.toISOString(),
@@ -337,6 +344,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     CONFIG.GRACE_PERIOD_MINUTES = safe.gracePeriodMinutes;
     CONFIG.MAX_ALERTS           = safe.maxAlerts;
     CONFIG.ALERT_SOUND          = safe.alertSound;
+    CONFIG.OWNED_CALENDARS_ONLY = safe.ownedCalendarsOnly;
     sendResponse({ ok: true });
     return;
   }
