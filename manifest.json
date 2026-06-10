@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Meet Watchdog",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Alerts you when a Google Meet, Zoom, or Teams call is active but you haven't joined.",
 
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA4lMVYsMqa9KEq+dE2f/sqnb4ejoclGrrGJXfQNLDChrCP3XJ0dqRndlR/xAOtsnajdJwXwUsMswRuHFFESNWGeRE9cEKI5M6ZJ2M0u7sAtrPt1icjmNMRTcc/GYAxe9mVdZFX3c3OLTpfoCLbJQ+X7utveMmnaEjPeUt2HMtu4MuJGWh1ODyqH0tgrzqq3fHItvAcVLxgL4S/BnKgjBCxsRkO0Po5Whgq6vI4WQCSZraIhHhKzQryvbPngVbU4gYCaCLvX3TMvGZPeqRuu4i4TC6ZU9YK9aq96CCGy4CBiNfZMvaOo3Eus4GZjypdu3fdpCpSJAvJ9BmLMYZV8dvmwIDAQAB",

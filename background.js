@@ -148,12 +148,16 @@ async function getActiveEvents() {
         if (seenUrls.has(url)) break; // same event on multiple calendars
         seenUrls.add(url);
 
-        const startTime     = new Date(event.start.dateTime || event.start.date);
+        const startTime      = new Date(event.start.dateTime || event.start.date);
         const secsSinceStart = Math.floor((now - startTime) / 1000);
+        // Use the date portion of the start time as part of the state key so that
+        // recurring meetings (same URL every week) each get their own state entry.
+        const startDate = startTime.toISOString().slice(0, 10);
         events.push({
           title: event.summary || 'Untitled meeting',
           platform,
           url,
+          startDate,
           secsSinceStart,
         });
         break;
@@ -263,15 +267,28 @@ async function checkMeetings() {
   const { meetingState = {} } = await chrome.storage.local.get('meetingState');
   let changed = false;
 
-  for (const { title, platform, url, secsSinceStart } of events) {
-    const entry = meetingState[url];
+  // Prune state entries for past dates to prevent unbounded storage growth.
+  // Keys are either "url::YYYY-MM-DD" (current format) or bare URLs (legacy).
+  // Remove any entry whose date is strictly before today.
+  const todayStr = new Date().toISOString().slice(0, 10);
+  for (const key of Object.keys(meetingState)) {
+    const datePart = key.includes('::') ? key.split('::')[1] : null;
+    if (!datePart || datePart < todayStr) {
+      delete meetingState[key];
+      changed = true;
+    }
+  }
+
+  for (const { title, platform, url, startDate, secsSinceStart } of events) {
+    const stateKey = `${url}::${startDate}`;
+    const entry = meetingState[stateKey];
 
     if (entry === 'attended') continue;
 
     // After the meeting has started: if tab is open, mark as attended and stop.
     if (secsSinceStart >= 0 && await isInCall(platform, url)) {
       console.log(`[MeetWatchdog] Detected in call: ${title}`);
-      meetingState[url] = 'attended';
+      meetingState[stateKey] = 'attended';
       changed = true;
       continue;
     }
@@ -299,7 +316,7 @@ async function checkMeetings() {
     playAlertSound();
     openUrl(url);
 
-    meetingState[url] = { alerts: alertCount + 1 };
+    meetingState[stateKey] = { alerts: alertCount + 1 };
     changed = true;
   }
 
