@@ -17,6 +17,7 @@ rsync -a \
   --exclude='*.swp' \
   --exclude='.*.swp' \
   --exclude='.claude' \
+  --exclude='.DS_Store' \
   --exclude='store-assets' \
   --exclude='build-store-zip.sh' \
   . "$TMPDIR/"

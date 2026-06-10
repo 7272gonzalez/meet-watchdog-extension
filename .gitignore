@@ -4,3 +4,4 @@ key.pem
 *.swp
 .*.swp
 .claude/
+.DS_Store
