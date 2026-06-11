@@ -4,6 +4,7 @@ const DEFAULTS = {
   maxAlerts: 3,
   alertSound: 'rapidBeeps',
   ownedCalendarsOnly: true,
+  acceptedOnly: false,
 };
 
 async function load() {
@@ -13,6 +14,7 @@ async function load() {
   document.getElementById('maxAlerts').value            = stored.maxAlerts;
   document.getElementById('alertSound').value           = stored.alertSound;
   document.getElementById('ownedCalendarsOnly').checked = stored.ownedCalendarsOnly;
+  document.getElementById('acceptedOnly').checked       = stored.acceptedOnly;
 }
 
 document.getElementById('save').addEventListener('click', async () => {
@@ -23,6 +25,7 @@ document.getElementById('save').addEventListener('click', async () => {
     maxAlerts:          clamp(parseInt(document.getElementById('maxAlerts').value,   10) || 3,  1,  10),
     alertSound:         document.getElementById('alertSound').value,
     ownedCalendarsOnly: document.getElementById('ownedCalendarsOnly').checked,
+    acceptedOnly:       document.getElementById('acceptedOnly').checked,
   };
 
   await chrome.storage.sync.set(values);

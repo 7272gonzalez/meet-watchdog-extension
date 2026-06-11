@@ -8,6 +8,7 @@ const CONFIG = {
   MAX_ALERTS:            3,
   ALERT_SOUND:           'rapidBeeps',
   OWNED_CALENDARS_ONLY:  true,
+  ACCEPTED_ONLY:         false,
 };
 
 const VALID_SOUNDS = ['chime', 'rapidBeeps', 'siren', 'buzzer', 'phoneRing', 'triplePing', 'windChimes', 'meditationBell', 'dogBark'];
@@ -21,13 +22,14 @@ function sanitiseConfig(vals) {
     gracePeriodMinutes:  (Number.isFinite(vals.gracePeriodMinutes) && vals.gracePeriodMinutes >= 1 && vals.gracePeriodMinutes <= 60) ? vals.gracePeriodMinutes : 15,
     maxAlerts:           (Number.isFinite(vals.maxAlerts)          && vals.maxAlerts          >= 1 && vals.maxAlerts          <= 10) ? vals.maxAlerts          : 3,
     alertSound:          VALID_SOUNDS.includes(vals.alertSound) ? vals.alertSound : 'rapidBeeps',
-    ownedCalendarsOnly:  vals.ownedCalendarsOnly !== false, // default true; only false when explicitly set
+    ownedCalendarsOnly:  vals.ownedCalendarsOnly !== false,
+    acceptedOnly:        vals.acceptedOnly === true, // default false; only true when explicitly set
   };
 }
 
 // Load saved config from storage on startup
 chrome.storage.sync.get(
-  { alertBeforeMinutes: 0, gracePeriodMinutes: 15, maxAlerts: 3, alertSound: 'rapidBeeps', ownedCalendarsOnly: true },
+  { alertBeforeMinutes: 0, gracePeriodMinutes: 15, maxAlerts: 3, alertSound: 'rapidBeeps', ownedCalendarsOnly: true, acceptedOnly: false },
   (vals) => {
     const safe = sanitiseConfig(vals);
     CONFIG.ALERT_BEFORE_MINUTES = safe.alertBeforeMinutes;
@@ -35,6 +37,7 @@ chrome.storage.sync.get(
     CONFIG.MAX_ALERTS           = safe.maxAlerts;
     CONFIG.ALERT_SOUND          = safe.alertSound;
     CONFIG.OWNED_CALENDARS_ONLY = safe.ownedCalendarsOnly;
+    CONFIG.ACCEPTED_ONLY        = safe.acceptedOnly;
   }
 );
 
@@ -126,11 +129,13 @@ async function getActiveEvents() {
     }
 
     for (const event of data.items || []) {
-      // Skip declined invites
-      const declined = (event.attendees || []).some(
-        (a) => a.self && a.responseStatus === 'declined'
-      );
-      if (declined) continue;
+      // Skip based on RSVP status.
+      // selfAttendee is undefined for events with no attendee list (organiser-only
+      // or personal events) — those always pass through regardless of settings.
+      const selfAttendee = (event.attendees || []).find((a) => a.self);
+      const rsvp = selfAttendee?.responseStatus;
+      if (rsvp === 'declined') continue;
+      if (CONFIG.ACCEPTED_ONLY && rsvp === 'needsAction') continue;
 
       // Gather all text that might contain a call link
       const raw = [
@@ -362,6 +367,7 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     CONFIG.MAX_ALERTS           = safe.maxAlerts;
     CONFIG.ALERT_SOUND          = safe.alertSound;
     CONFIG.OWNED_CALENDARS_ONLY = safe.ownedCalendarsOnly;
+    CONFIG.ACCEPTED_ONLY        = safe.acceptedOnly;
     sendResponse({ ok: true });
     return;
   }
